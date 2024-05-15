@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <title>Custom Schedule Generator</title>
+        <!-- Title for the program.-->
+    </head>
+
+    <body>
+
+        <h3 id = 'title' style ="color: white">Custom Schedule Generator (EXAMPLE)</h3>
+
+        <style id = "eclipse">
+            body {
+                background-image: url('https://cdn.discordapp.com/attachments/644935241475031040/1227400454149771344/image.png?ex=663a1100&is=6638bf80&hm=7a731a70de8032e3b32105971126ac2abcc634197723fe110712d2862fb40f5d&');
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-position: 56% 40%;
+                background-size: 200%;
+            }
+        </style>
+        <!-- Sets the title and the background of the site. -->
+
+        <canvas id="canvas" width = "700" height = "1440"></canvas>
+        <canvas id="canvasPM" width = "700" height = "1440"></canvas>
+        <canvas id="canvasAM" width = "700" height = "720"></canvas>
+        <!-- Generates all canvas' used. "canvas" is used to create
+        the schedule in a visual manner, while PM and AM display everything 
+        on screen so it fits.-->
+
+        <p style ="color: white" id = 'greeting'> Welcome! Do you have any plans for today?</p> 
+
+        <p style ="color: white" id = 'planNameLabel'>Event:</p>
+        <input id = "planName"><br>
+        <p style ="color: white" id = 'startTimeLabel'>Start Time:</p>
+        <input id = "startTime"><br>
+        <p style ="color: white" id = 'endTimeLabel'>End Time:</p>
+        <input id = "endTime"><br><br><br>
+        <!-- Generates the opening interface for the day. Creates the boxes and buttons
+        required to create and store daily plans that aren't part of the inherent schedule.-->
+
+        <button id = "savePlan" onclick="store()">Save Plan.</button>
+        <button id = "loadPlan" onclick="generate()">I have no other plans.</button>
+        <!--loadPlan activates the rest of the site functions.-->
+
+        <p id = success style ="color: white"></p>
+        <!-- Empty text element accessed within the JS for confiming saved plans. -->
+
+        <script> 
+            //localStorage.clear() //Clears all memory. Used For Testing
+
+            const canvas = document.getElementById("canvas");
+            const canvas2 = document.getElementById("canvasPM");
+            const canvas3 = document.getElementById("canvasAM");
+            const ctx = canvas.getContext("2d");
+            canvas.style.top = "80px";
+            canvas.style.left = "500px";
+            canvas.style.position = "absolute";
+            canvas2.style.top = "80px";
+            canvas2.style.left = "1200px";
+            canvas2.style.position = "absolute";
+            canvas3.style.top = "80px";
+            canvas3.style.left = "500px";
+            canvas3.style.position = "absolute";
+            // Defines all the canvas' within JS. Sets all canvas' positions. 
+            
+            countUniquePlans = 0
+            uniquePlans = {}
+            function store() {
+                countUniquePlans++
+                array1 = document.getElementById("planName").value
+                array2 = document.getElementById("startTime").value
+                array3 = document.getElementById("endTime").value
+                uniquePlans[countUniquePlans] = [array1,array2,array3]
+                document.getElementById("success").innerHTML = `${uniquePlans[countUniquePlans][0]} has been saved!`
+            }
+            // Function used to save plans within a "unique plans" list.
+
+            const date = new Date();
+            const previousDay = Number(localStorage.getItem("ExampleDate"))
+            const monthCheck = Number(localStorage.getItem("ExampleMonth"))
+            // Global Date Variables
+            // previousDay and monthCheck are used repeatedly to check if the program is running 
+            // within the same day as previously loaded.
+
+            function generate() {
+                const scrapper = []
+                scrapper.push(document.getElementById("planNameLabel"))
+                scrapper.push(document.getElementById("planName"))
+                scrapper.push(document.getElementById("startTimeLabel"))
+                scrapper.push(document.getElementById("startTime"))
+                scrapper.push(document.getElementById("endTimeLabel"))
+                scrapper.push(document.getElementById("endTime"))
+                scrapper.push(document.getElementById("savePlan"))
+                scrapper.push(document.getElementById("loadPlan"))
+                scrapper.push(document.getElementById("success"))
+                for (e in scrapper) {
+                    scrapper[e].style.display = 'none'
+                    scrapper[e].remove()
+                }
+                // Removes the opening interface.
+
+                const day = date.getDay()
+
+                const previousDiff = localStorage.getItem("ExampleDifficulty")
+                let diff = 0
+                if (previousDiff >= 7) {
+                    diff = 10 - previousDiff
+                } else diff = Math.floor(Math.random() * 8 + 3)
+                let usableIndexes = 0
+                // Defines the difficulty of the day.
+
+                switch(diff) {
+                    case 1: 
+                        usableIndexes = 24
+                        break;
+                    case 2:
+                        usableIndexes = 32
+                        break;
+                    case 3:
+                        usableIndexes = 40
+                        break;
+                    case 4: 
+                        usableIndexes = 48
+                        break;
+                    case 5: 
+                        usableIndexes = 56
+                        break;
+                    case 6: 
+                        usableIndexes = 64
+                        break;
+                    case 7: 
+                        usableIndexes = 72
+                        break;
+                    case 8: 
+                        usableIndexes = 80
+                        break;
+                    case 9: 
+                        usableIndexes = 88
+                        break;
+                    case 10: 
+                        usableIndexes = 96
+                        break;
+
+                }
+                // Uses the difficulty variable to create a pool of schedule indexes to be dedicated
+                // to studying.
+
+                let schedule = {}
+                let indsett = 0
+                for (let k = 0; k <= 1; k++) {
+                    aorp = ["AM","PM"]
+                    for (let j = 0; j <= 11; j++) {
+                        if (j === 0) { 
+                                hour = "12:"
+                        } else hour = j+":"
+                        for (let i = 0; i < 12; i++) {
+                            if (i === 0 || i === 1) {
+                                schedule[hour+"0"+(i*5)+aorp[k]] = {
+                                    index: indsett,
+                                    occ: 'none'
+                                }
+                                indsett++
+                            } else {
+                                schedule[hour+(i*5)+aorp[k]] = {
+                                    index: indsett,
+                                    occ: 'none'
+                                }
+                                indsett++
+                            }
+                        }
+                    }
+                } 
+                // Generates the backend schedule as an object, where each item's key is the time,
+                // and said item stores an identifying index number (1 to 288~) and the name of an event.
+                
+
+                function grabTimefromIndex(obj, index) {
+                    return Object.keys(obj).find(time => obj[time].index === index);
+                } // Key Grabber for Schedule Dictionary
+
+                function Plan(name, starttime, endtime) {
+                    let tracker = schedule[starttime].index
+                    const duration = schedule[endtime].index - schedule[starttime].index
+                    for (let i = 0; i <= duration; i++) {
+                        cycletime = grabTimefromIndex(schedule, tracker)
+                        schedule[cycletime].occ = name
+                        tracker++
+                    }
+                } // Plan Definition
+
+                switch(day) {
+                    case 0: { // Sunday
+                        Plan('Winding Down', '12:00AM', '12:55AM')
+                        Plan('Sleep', '1:00AM', '8:55AM')
+                        Plan('Getting Up', '9:00AM', '10:25AM')
+
+                        Plan('Random Plan', '5:00PM', '5:55PM')
+
+                        Plan('Winding Down', '10:00PM', '10:55PM')
+                        Plan('Sleep', '11:00PM', '11:55PM')
+                        break;
+                    } 
+                    case 1: { // Monday
+                        Plan('Sleep', '12:00AM', '6:55AM')
+                        Plan('Getting Up', '7:00AM', '8:25AM')
+
+                        Plan('Class #1', '12:00PM', '12:55PM')
+    
+                        Plan('Random Plan', '8:30PM', '9:55PM')
+                        Plan('Winding Down', '10:00PM', '10:55PM')
+                        Plan('Sleep', '11:00PM', '11:55PM')
+                        break;
+                    }
+                    case 2: { // Tuesday
+                        Plan('Sleep', '12:00AM', '6:55AM')
+                        Plan('Getting Up', '7:00AM', '8:25AM')
+
+                        Plan('Class #2', '9:00AM', '10:25AM')
+                        Plan('Class #3', '12:00PM', '12:55PM')
+                        Plan('Class #4', '2:00PM', '3:25PM')
+    
+                        Plan('Winding Down', '10:00PM', '10:55PM')
+                        Plan('Sleep', '11:00PM', '11:55PM')
+                        break;
+                    }
+                    case 3: { // Wednesday
+                        Plan('Sleep', '12:00AM', '6:55AM')
+                        Plan('Getting Up', '7:00AM', '8:25AM')
+
+                        Plan('Class #1', '12:00PM', '12:55PM')
+                        Plan('Class #4 Tutorial', '3:30PM', '4:25PM')
+    
+                        Plan('Random Plan', '8:30PM', '9:55PM')
+                        Plan('Winding Down', '10:00PM', '10:55PM')
+                        Plan('Sleep', '11:00PM', '11:55PM')
+                        break;
+                    }
+                    case 4: { // Thursday
+                        Plan('Sleep', '12:00AM', '6:55AM')
+                        Plan('Getting Up', '7:00AM', '8:25AM')
+
+                        Plan('Class #2', '9:00AM', '10:25AM')
+                        Plan('Class #3', '12:00PM', '12:55PM')
+                        Plan('Class #4', '2:00PM', '3:25PM')
+                        break;
+                    }
+                    case 5: { // Friday
+                        Plan('Winding Down', '12:00AM', '12:55AM')
+                        Plan('Sleep', '1:00AM', '8:55AM')
+                        Plan('Getting Up', '9:00AM', '10:25AM')
+
+                        Plan('Random Plan', '5:00PM', '5:55PM')
+                        break;
+                    }
+                    case 6: { // Saturday
+                        Plan('Winding Down', '12:00AM', '12:55AM')
+                        Plan('Sleep', '1:00AM', '8:55AM')
+                        Plan('Getting Up', '9:00AM', '10:25AM')
+
+                        Plan('Random Plan', '5:00PM', '5:55PM')
+                        break;
+                    }
+                    default: document.write("No.") // Lets me know if there is a problem.
+                    break;
+                } // Unchanging "Solid" Blocks that change only by the day (stay consistent weekly). 
+
+                for (plan in uniquePlans) {
+                    Plan(uniquePlans[plan][0],uniquePlans[plan][1],grabTimefromIndex(schedule, schedule[uniquePlans[plan][2]].index -1))
+                } // Inputed "Gas" Blocks from the opening page.
+
+    
+                let callback = 0
+                while (usableIndexes > 0) {
+                    let duration = Math.floor(Math.random()*usableIndexes + 1)
+                    //document.write(`Duration: ${duration} </br>`)
+                    if (duration <= 2) {
+                        if (usableIndexes <= 2 || callback > 100000) {
+                            for (time in schedule) {
+                                if (schedule[time].occ === 'Study' && schedule[grabTimefromIndex(schedule, schedule[time].index + 1)].occ === 'none') {
+                                    schedule[grabTimefromIndex(schedule, schedule[time].index + 1)].occ = 'Study'
+                                    usableIndexes--
+                                    if (usableIndexes === 0) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (usableIndexes > 0) {
+                                document.write(`Plan has ${usableIndexes} unused indexes. </br>`)
+                                break;
+                            }
+                        } 
+                    } else {
+                        list = []
+                        start = Math.floor(Math.random()*168) + 96
+                        end = start + duration - 1
+                        //document.write(`Indexes: ${start}-${end} </br>`)
+                        for (i = 0; i < duration; i++) {
+                            list.push(grabTimefromIndex(schedule, start + i))
+                        }
+                        //document.write(`Time Interval: ${list[0]}-${list[list.length -1]} </br>`)
+                        let conflict = false
+                        for (i = 0; i < duration; i++) {
+                            if (schedule[list[i]].occ != 'none' || schedule[list[i]].index >= 264) {
+                                conflict = true
+                                //document.write("CONFLICT </br>")
+                                //document.write("</br>")
+                                break;
+                            }
+                        }
+                        if (conflict === false) {
+                            Plan('Study', list[0], list[list.length -1])
+                            usableIndexes -= duration
+                            //document.write(`Indexes left: ${usableIndexes} </br>`)
+                            //document.write("</br>")
+                        } else {}
+                    }
+                    callback++
+                } // Study "Liquid" Blocks Generator
+
+                if ((date.getMonth() === monthCheck) && (date.getDate() === previousDay)) {
+                    diff = Number(localStorage.getItem("ExampleDifficulty"))
+                    loadedschedule = localStorage.getItem('ExampleSchedule')
+                    schedule = JSON.parse(loadedschedule)
+
+                    info = document.getElementById("greeting")
+                    explaination = "</br> This is where the schedule is generated. If you were to wait a day, </br> then the program will 'reset', and new set of slightly different events </br>should show up. </br></br> The difficulty level is an element that determines the amount of time </br> allocated to the random study blocks, with 1 being the lowest and 10 </br> being the highest (there are no study blocks on a 0). </br></br> I have also used this element to factor in short-term burnout. If any </br> given day happens to be a difficulty 7 or higher, then the following </br> day will be will be 10 minus the previous difficulty level. </br> (Ex. If you have a difficulty 9, the next day will have a difficulty 1). </br> This is done through constantly saving and refering to several values </br> in local storage. </br></br> If you wish to test this code further, please feel free to play with it </br> as much as you wish. Resetting the local storage, and by default </br>the schedule, is on Line 52 of the source code."
+                    info.innerHTML = `</br>` + `Date: ${date}` + `<br>` + `Difficulty: ${diff}` + `<br> ${explaination} <br><br><br>`
+
+                } else document.write("Please refresh the page to get your schedule!")
+                
+                // Loads Previous Schedule if Applicable + Basic Information
+
+                localStorage.setItem("ExampleDifficulty", diff)
+                localStorage.setItem("ExampleMonth", date.getMonth())
+                localStorage.setItem("ExampleDate", date.getDate())
+                localStorage.setItem("ExampleSchedule", JSON.stringify(schedule))
+                // Saves Schedule and other useful values into local storage.
+                
+                ctx.fillStyle= "white";
+                ctx.strokeStyle = "white";
+                for (let d = 0; d < 97; d++) {
+                    ctx.moveTo(0, 15*d);
+                    ctx.lineTo(600, 15*d);
+                    ctx.font = "10px TimesNewRoman"
+                    if (grabTimefromIndex(schedule, 3*d) === undefined) {
+                        ctx.fillText("12:00AM",603,15*d + 3)
+                    } else ctx.fillText(grabTimefromIndex(schedule, 3*d),603,15*d + 3)
+                }
+                ctx.closePath();
+                ctx.stroke()
+                ctx.fill();
+                // Makes Physical Schedule Outline
+
+                /*
+                for (time in schedule) {
+                    document.write(`${time} - ${schedule[time].occ} [${schedule[time].index}] </br>`)
+                } */// Generates Schedule (Text-Based Version)
+
+                savedevent = 'none'
+                for (time in schedule) {
+                    if (schedule[time].occ !== 'none') {
+                        if (savedevent === 'none') {
+                            ctx.beginPath();
+                            ctx.rect(0,(schedule[time].index)*5,600,5)
+                            writestart = time
+                            savedevent = schedule[time].occ
+                        }
+                        if (time === "11:55PM") { 
+                            ctx.rect(0,(schedule[time].index)*5,600,5)
+                            writeend = grabTimefromIndex(schedule, schedule[time].index + 1)
+                            if (savedevent === 'Study') {
+                                ctx.fillStyle= "brown"
+                            } else if (savedevent === 'Sleep') {
+                                ctx.fillStyle= '#32254d' 
+                            } else if (savedevent === 'Winding Down') {
+                                ctx.fillStyle= '#5f4078' 
+                            } else if (savedevent === 'Getting Up') {
+                                ctx.fillStyle= '#a8ab00' 
+                            } else {
+                                colorchoice = ['#1b3782', '#f58720','#8ebd20','#168729','#14d9a7','#18acc9','#1850c9','#3912a3','#7707b8','#5f4078','#a30b99','#26876a','#9aa632']
+                                colorPick = colorchoice[Math.floor(Math.random()*colorchoice.length)]
+                                ctx.fillStyle = colorPick
+                            }
+                            ctx.closePath()
+                            ctx.fill()
+                            ctx.beginPath(); 
+                            ctx.font = "13px TimesNewRoman"
+                            ctx.fillStyle= "white"
+                            ctx.fillText(`${savedevent} (${writestart} - 12:00AM)`,20,schedule[writestart].index*5 + 12)
+                            ctx.closePath()
+                            ctx.fill()
+                            savedevent = 'none'
+                            ctx.beginPath(); 
+                            ctx.fillStyle= "white";
+                            ctx.strokeRect(1, 1, 598,1438)
+                            ctx.closePath()
+                            ctx.fill()
+                            const dctx = canvas2.getContext("2d");
+                            const tctx = canvas3.getContext("2d");
+                            dctx.drawImage(canvas, 0, 720, 700, 1440, 0, 0, 700, 1440)
+                            tctx.drawImage(canvas, 0, 0)
+                            document.getElementById("canvas").remove()
+                        } 
+                        if (schedule[grabTimefromIndex(schedule, schedule[time].index + 1)].occ !== savedevent) { 
+                            ctx.rect(0,(schedule[time].index)*5,600,5)
+                            writeend = grabTimefromIndex(schedule, schedule[time].index + 1)
+                            if (savedevent === 'Study') {
+                                ctx.fillStyle= "brown"
+                            } else if (savedevent === 'Sleep') {
+                                ctx.fillStyle= '#32254d' 
+                            } else if (savedevent === 'Winding Down') {
+                                ctx.fillStyle= '#5f4078' 
+                            } else if (savedevent === 'Getting Up') {
+                                ctx.fillStyle= '#a8ab00' 
+                            } else {
+                                colorchoice = ['#1b3782', '#f58720','#8ebd20','#168729','#14d9a7','#18acc9','#1850c9','#3912a3','#7707b8','#5f4078','#a30b99','#26876a','#9aa632']
+                                colorPick = colorchoice[Math.floor(Math.random()*colorchoice.length)]
+                                ctx.fillStyle = colorPick
+                            }
+                            ctx.closePath()
+                            ctx.fill()
+                            ctx.beginPath(); 
+                            ctx.font = "13px TimesNewRoman"
+                            ctx.fillStyle= "white"
+                            ctx.fillText(`${savedevent} (${writestart} - ${writeend})`,20,schedule[writestart].index*5 + 12)
+                            ctx.closePath()
+                            ctx.fill()
+                            savedevent = 'none'
+                        } 
+                        if (schedule[grabTimefromIndex(schedule, schedule[time].index + 1)].occ === savedevent) {
+                           ctx.rect(0,(schedule[time].index)*5,600,5)
+                        }
+                    }
+                    if (time === "11:55PM") {
+                        ctx.beginPath(); 
+                        ctx.fillStyle= "white";
+                        ctx.strokeRect(1, 1, 598,1438)
+                        ctx.closePath()
+                        ctx.fill()
+                        const dctx = canvas2.getContext("2d");
+                        const tctx = canvas3.getContext("2d");
+                        dctx.drawImage(canvas, 0, 720, 700, 1440, 0, 0, 700, 1440)
+                        tctx.drawImage(canvas, 0, 0)
+                        document.getElementById("canvas").remove()
+                    }
+                }
+                // Generates Schedule (Visual Version)
+            }
+            // generate is a giant function that only activates either when
+            // "I have no plans" is pressed, or if the date in local storage
+            // is identical to the actual date. Aka, the schedule was already
+            // generated today/
+
+            if ((date.getMonth() === monthCheck) && (date.getDate() === previousDay)) {
+                generate()
+            }
+            // 
+        </script>
+
+    </body>
+
+</html>
